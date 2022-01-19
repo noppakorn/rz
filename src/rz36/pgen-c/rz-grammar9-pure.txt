@@ -1,0 +1,98 @@
+                                                               
+// This is LL(1) grammar for RZ language    1 May 2001
+//   rz-grammar9    simplify expr           23 Oct 2010
+//   rz-grammar9 pure (no action routine)   19 Nov 2010
+//   add pragma				     9 Feb 2017
+
+pass = dcl pass | tkEOF
+
+// declaration is
+//   - function definition    f(arg){ body }
+//   - variable declaration   a, b, c[12] ... ;
+
+dcl = tkIDEN dcl2 | tkPRAGMA tkSEMI
+dcl2 =
+  tkLPAREN formal tkRPAREN stmt |
+  tkLBRACKET tkNUMBER tkRBRACKET dcl3 |
+  tkCOMMA |
+  tkSEMI
+
+dcl3 = tkCOMMA | tkSEMI
+
+formal = tkIDEN formals | nil
+formals = tkCOMMA formal | nil
+
+stmt = block | stmt1
+stmts = stmt1 stmts | nil
+block = tkLBRACE stmts tkRBRACE
+
+//  statement is 
+//    - ;
+//    - if( expr ) stmt else_stmt optional
+//    - while( expr ) stmt
+//    - return expr ;
+//    - print( ... ) ;
+//    - *name = expr ;
+//    - name = expr ;
+//    - name[ expr ] = expr ; 
+//    - name( ... ) ;    function call
+
+stmt1 =
+  tkSEMI |
+  tkIF tkLPAREN expr tkRPAREN stmt elsest |
+  tkWHILE tkLPAREN expr tkRPAREN stmt |
+  tkRETURN returnst |
+  tkPRINT tkLPAREN prlist tkRPAREN tkSEMI |
+  tkSTAR tkIDEN tkEQ expr tkSEMI |
+  tkIDEN stmt2
+
+elsest = tkELSE stmt | nil
+returnst =  tkSEMI | expr tkSEMI
+
+prlist =  tkSTRING prlists | expr prlists
+prlists = tkCOMMA prlist | nil
+
+stmt2 =
+  tkEQ expr tkSEMI |
+  tkLBRACKET expr tkRBRACKET tkEQ expr tkSEMI |
+  tkLPAREN param tkRPAREN tkSEMI
+
+param = expr params | nil
+params = tkCOMMA param | nil
+
+//  an expression is
+//   - term op term op . . . term
+//   - unary: - ! * &
+//   - term: number, name, name[expr], name(...)
+//   - ( expr ) parenthesis has highest precedence
+
+expr = term exprs
+exprs = bop term exprs | nil
+
+bop = 
+  tkOROR  | tkANDAND | 
+  tkLT    | tkLE     | 
+  tkEQEQ  | tkNE     |
+  tkGE    | tkGT     | 
+  tkPLUS  | tkMINUS  | 
+  tkSTAR  | tkSLASH
+
+// do uop first
+term =
+  tkMINUS term1 |
+  tkNOT term1   |
+  tkSTAR term1  |
+  tkAND tkIDEN index |  
+  term1
+
+term1 =
+  tkIDEN mod |
+  tkNUMBER |
+  tkSTRING |
+  tkLPAREN expr tkRPAREN
+
+// function call or vector
+mod =  tkLPAREN param tkRPAREN | index
+index = tkLBRACKET expr tkRBRACKET | nil
+
+// end 

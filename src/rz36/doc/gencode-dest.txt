@@ -1,0 +1,38 @@
+gencode 2
+
+specify dest in genex
+
+genex r2   (dest is r2)
+  if atom genatom {gv,lv,#n}
+     gv: ld r2 ads
+     lv: mov r2 r
+     #n: mov r2 #n
+  else // list
+    switch op
+    vec: genex r3 idx    // vec RHS
+         switch base
+           gv: ld r2 @name r3
+           lv: ld r2 +r r3
+    ...
+
+genAsg r2
+  if LHS gv
+    genex r2 RHS
+    st r2 ads1
+  if LHS lv
+    genex r1 RHS      // throw away r2?
+  if LHS vec
+    genex r2 RHS
+    genex r3 idx      // vec LHS
+    switch base
+      gv: st r2 @name r3
+      lv: st r2 +r r3
+
+genbop r2
+  genex r2 ex1
+  genex r3 ex2
+  op r2 r2 r3
+
+
+   
+   

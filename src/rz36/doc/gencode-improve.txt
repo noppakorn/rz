@@ -1,0 +1,35 @@
+   
+genex
+  // return r2
+  if atom genatom {gv,lv,#n}
+          gv: ld r2 ads2
+          lv: r2
+          #n: mov r2 #n
+  else // list
+    switch op
+    vec:  r3 = genex(idx)  // RHS
+          gv: ld r2 @name r3
+          lv: ld r2 +r r3
+     ...
+
+genAsg
+  if LHS gv
+     r2 = genex(RHS)
+     st r2 ads1
+  if LHS lv
+     switch RHS 
+        gv: ld r1 ads2
+        lv: mov r1 r2
+        #n: mov r1 #n
+        __: r2 = genex(RHS)
+            mov r1 r2
+  if LHS vec
+     r2 = genex(RHS)
+     r3 = genex(idx_LHS)
+     switch base_LHS
+        gv: st r2 @name r3
+        lv: st r2 +r r3
+
+     
+     
+     

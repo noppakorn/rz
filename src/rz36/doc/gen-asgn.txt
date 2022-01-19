@@ -1,0 +1,74 @@
+gencode assignment
+
+
+LHS1   	RHS2
+
+1) gv	gv	ld r2 ads2
+		<st r2 ads1>
+
+	lv	<st r2 ads1>
+
+	#n	mov r2 #n
+		<st r2 ads1>
+
+	vec	ld r2 ...vec rhs
+		<st r2 ads1>
+
+rule:
+  gen RHS to r2 
+  st r2 ads1
+
+2) lv	gv	ld <r1> ads2
+
+	lv	mov <r1> r2 ** (unlike 1)
+
+	#n	mov <r1> #n
+
+	vec	ld <r1> ...vec rhs
+
+rule:
+  give r1 as dest to gen RHS
+
+3) vec	gv	ld r2 ads2
+		<st r2 ...vec lhs>
+		
+	lv	<st r2 ...vec lhs>
+
+	#n	mov r2 #n
+		<st r2 ...vec lhs>
+
+	vec	ld r2 ...vec rhs
+		<st r2 ...vec lhs>
+
+rule:
+  gen RHS to r2 (similar to 1)
+  st r2 ...vec lhs
+
+vec rhs	
+	name
+	gv	ld...@name idx
+
+	lv	ld...+r2 idx
+
+vec lhs
+	name
+	gv	st...@name idx
+
+	lv	st...+r2 idx
+
+
+idx	gv	ld <r3> ads3
+
+	lv	<r3>
+
+	#n	mov <r3> #n
+
+	vec	ld <r3>...vec rhs
+
+rule for idx 
+  must return r3, gen idx (RHS) to r3
+    except idx is lv (r3)
+
+16 Jan 2013
+
+

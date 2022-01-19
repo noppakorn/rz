@@ -1,0 +1,121 @@
+                                                               
+// This is LL(1) grammar for RZ language    1 May 2001
+// fix bug if in stmt, unary minus in item, change symtab  23 Dec 2001
+// change to one pass  3 Jan 2002
+// change syntax for variable declare name, name ... ;  24 Sept 2002
+// lot of modifications to untangle parsing parameters
+//   in function call        		6 Oct 2010
+//   change to generate parse tree	20 Oct 2010
+//   rz-grammar9    simplify expr       23 Oct 2010
+//   add pragma				 9 Feb 2017
+
+  
+"// parser generated from rz-grammar 17 Oct 2010"
+"#include <compile.h>"
+"#include <parse.h>"
+"extern int pv;"
+
+pass = dcl pass | tkEOF %
+
+// declaration is
+//   - function definition    f(arg){ body }
+//   - variable declaration   a, b, c[12] ... ;
+
+dcl = tkIDEN "pusht(tokstring);" dcl2 |
+  tkPRAGMA "dopragma(tokstring);" tkSEMI %
+dcl2 [ n ] =
+  tkLPAREN "pv=0;" formal tkRPAREN "setfun(popt());" stmt "dofun();" |
+  tkLBRACKET tkNUMBER "n=atoi(tokstring);" tkRBRACKET "putvec(popt(),n);" dcl3 |
+  tkCOMMA "putvar(popt());" |
+  tkSEMI "putvar(popt());" %
+
+dcl3 = tkCOMMA | tkSEMI % 
+
+formal = tkIDEN "doLocal();" formals | nil %
+formals = tkCOMMA formal | nil %
+
+stmt = block | stmt1 %
+stmts = stmt1 stmts | nil "doblock();" %
+block = tkLBRACE "ypush(MARK);" stmts tkRBRACE %
+
+//  statement is 
+//    - ;
+//    - if( expr ) stmt else_stmt optional
+//    - while( expr ) stmt
+//    - return expr ;
+//    - print( ... ) ;
+//    - *name = expr ;
+//    - name = expr ;
+//    - name[ expr ] = expr ; 
+//    - name( ... ) ;    function call
+
+stmt1 =
+  tkSEMI "ypush(NIL);" |
+  tkIF tkLPAREN expr tkRPAREN stmt elsest |
+  tkWHILE tkLPAREN expr tkRPAREN stmt "dowhile();" |
+  tkRETURN returnst |
+  tkPRINT tkLPAREN "ypush(MARK);" prlist tkRPAREN tkSEMI "doprint();" |
+  tkSTAR tkIDEN "dovar(tokstring);douop(tkDEREF);" tkEQ expr tkSEMI "doset();" |
+  tkIDEN "pusht(tokstring);" stmt2 %
+
+elsest = 
+  tkELSE stmt "doifelse();" | 
+  nil "doif();" %
+returnst =
+  tkSEMI "ypush(NIL); doreturn();" |
+  expr tkSEMI "doreturn();" %
+
+prlist = 
+  tkSTRING "dostring();" prlists |
+  expr prlists %
+prlists = tkCOMMA prlist | nil %
+
+stmt2 =
+  tkEQ "dovar(popt());" expr tkSEMI "doset();" |
+  tkLBRACKET expr tkRBRACKET tkEQ "dovec(popt());" expr tkSEMI "doset();" |
+  tkLPAREN "ypush(MARK);" param tkRPAREN tkSEMI "docall(popt());" %
+
+param = expr params | nil %
+params = tkCOMMA param | nil %
+
+//  an expression is
+//   - term op term op . . . term
+//   - unary: - ! * &
+//   - term: number, name, name[expr], name(...)
+//   - ( expr ) parenthesis has highest precedence
+
+expr = term "zpush(tkBOT);" exprs %
+exprs = bop term exprs | nil "zclean();" %
+
+bop = 
+  tkOROR "zop(tok);" | tkANDAND "zop(tok);" | 
+  tkLT "zop(tok);"   | tkLE "zop(tok);" | 
+  tkEQEQ "zop(tok);" | tkNE "zop(tok);" |
+  tkGE "zop(tok);"   | tkGT "zop(tok);" | 
+  tkPLUS "zop(tok);" | tkMINUS "zop(tok);" | 
+  tkSTAR "zop(tok);" | tkSLASH "zop(tok);" %
+
+// do uop first
+term =
+  tkMINUS term1 "douop(tkMINUS);" |
+  tkNOT term1 "douop(tkUNOT);" |
+  tkSTAR term1 "douop(tkDEREF);" |
+  tkAND tkIDEN "pusht(tokstring);" index "douop(tkADS);" |  
+  term1 %
+
+term1 =
+  tkIDEN "pusht(tokstring);" mod |
+  tkNUMBER "donum(tokstring);" |
+  tkSTRING "dostring();" |
+  tkLPAREN expr tkRPAREN %
+
+// function call or vector
+mod =
+  tkLPAREN "ypush(MARK);" param tkRPAREN "docall(popt());" |
+  index %
+
+index =
+  tkLBRACKET expr tkRBRACKET "dovec(popt());" |
+  nil "dovar(popt());" %
+
+// end 

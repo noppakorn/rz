@@ -1,0 +1,319 @@
+s2 code generator for rz
+
+base on eval()
+
+
+gen(e)
+
+if e == nil ret nil
+if isatom e  ret genatom e
+
+e1 = tail e  // argument list
+e = head e   // operator
+
+op = tail e
+switch op
+
+case if     genif e1
+case else   genifelse e1
+case while  genwhile e1
+case do     gendo e1
+
+case plus   genbop add e1
+case minus  genbop sub e1
+case star   genbop mul e1
+case slash   genbop div e1
+case andand  genbop logand e1
+case oror    genbop logor e1
+case ne     genbop ne e1
+case lt     genbop lt e1
+case le     genbop le e1
+case gt     genbop gt e1
+case ge     genbop ge e1
+
+case unot   genunot e1
+case uminus genuminus e1
+case deref  genderef e1
+case ads    genads e1
+
+case call   gencall e1
+case return genret e1
+case fun    genfun e1
+
+case vec   genvec e1
+case eq    genassg e1
+case print  genprint e1
+
+default  error("unknown op");
+
+ret nil
+
+-----------------
+
+genatom e          // atom: num, local, global
+  ty = head e
+  v = tail e
+  switch ty
+  case NUM:  
+    r3 = newR
+    out mv r3 #v
+  case STRING:
+    r3 = newR
+    out mv r3 #&strbuf[v]
+  case GNAME:
+    r3 = newR
+    ads = (getRef v) + base_data
+    out ld r3 ads
+  case LNAME:
+    r3 = v
+  ret r3
+
+genbop2 op e      // e is arglist
+
+ r1 = gen head e   // arg1
+ r2 = gen arg2 e   // arg2
+ r3 = newR
+ out op r3 r1 r2
+ freeR r1 r2
+ ret r3
+
+to specialise some argument for immediate
+
+genbop op e
+  r3 = newR
+  if isimm head e && iscommute op  // arg1 is imm?
+    n = cdr head e
+    r2 = gen arg2 e
+    out op r3 r2 #n
+    freeR r2
+  else if isimm arg2 e  // arg2 is imm?
+    r1 = gen head e
+    n  = cdr arg2 e
+    out op r3 r1 #n
+    freeR r1
+  else                 // normal bop
+    r1 = gen head e
+    r2 = gen arg2 e
+    out op r3 r1 r2
+    freeR r1 r2
+  ret r3
+
+-------------------
+
+genunot e
+  r1 = gen head e
+  out not r1 r1 
+  ret r1
+
+genuminus e
+  r1 = gen head e
+  out sub r1 r0 r1
+  ret r1
+
+genderef e
+  r1 = gen head e
+  out ld r1 @0 r1
+  ret r1
+
+genads e    // RHS {gv,lv,vec}
+  v = ...
+  switch ty
+  case gv:
+    r1 = newR
+    out ld r1 v
+    ret r1 
+  case lv:
+    ret v
+  case vec:         //  (vec nm idx)
+    r2 = gen arg3 e    // index
+    a = tail arg2 e    // ref of nm
+    if islocal arg2 e
+       out st +a r2 v
+    else
+       r1 = newR
+       out ld r1 getRef a
+       out st +r1 r2 v
+       freeR r1
+    freeR r2
+    ret v  
+
+-------------------
+
+genvec e             // RHS
+  r1 = gen head e
+  r2 = gen arg2 e    // index
+  r3 = newR
+  out ld r3 +r1 r2
+  freeR r1 r2
+  ret r3
+
+genassg e
+
+  v = gen arg2 e    //  RHS 
+
+                    //    if isderef head e 
+//LHS
+  switch lhs        //  {gv,lv,vec}
+  case gv: 
+    a = (getRef gv) + base_data
+    out st a v
+  case lv:
+    out st @lv fp v
+  case vec:          // e1 = (vec nm idx)
+    r1 = gen arg2 e1
+    r2 = gen arg3 e1
+    out st +r1 r2 v
+    freeR r1 r2
+
+  switch lhs       //  *{gv,lv,vec}
+  case *gv:
+    a = (getRef gv) + base_data
+    r1 = newR
+    out ld r1 a
+    out st @0 r1 v
+    freeR r1
+  case *lv:
+    r1 = newR
+    out ld r1 @lv fp
+    out st @0 r1 v
+    freeR r1
+  case *vec:          // e1 = (vec nm idx)
+    r1 = gen arg2 e1
+    r2 = gen arg3 e1
+    r3 = newR
+    out ld r3 +r1 r2
+    out st @0 r3 v
+    freeR r1 r2 r3
+
+  freeR v
+  ret nil
+---------------------
+
+genif e          // e is ( cond action)
+  r1 = gen head e
+  n = newlabel
+  out jf r1 "label_n"
+  r1 = gen arg2 e
+  out0 ":label_n"
+  ret r1
+
+genifelse e     // e is (cond true-act false act)
+  r1 = gen head e
+  m = newlabel
+  out jf r1 "label_m"
+  r1 = gen arg2 e
+  n = newlabel
+  out jmp "label_n"
+  out0 ":label_m"
+  r1 = gen arg3 e
+  out0 ":label_n"
+  ret r1
+
+genwhile e      // e is (cond body)
+  m = newlabel
+  out jmp "label_m"    // jump to cond
+  n = newlabel
+  out0 ":label_n"
+  r1 = gen arg2 e      // body
+  out0 ":label_m"     
+  r2 = gen head e      //
+  out jt r2 "label_n"
+  freeR r2
+  ret r1
+
+gendo e          // e is (ex1 ex2 ...)
+  while e != nil
+    r1 = gen head e
+    e = tail e
+  ret r1
+
+---------------------
+
+// stack frame
+//    lo
+//
+//  fp'    <- fp
+//  lv1  pv
+//  lv2
+//  ...
+//  lvn
+//  retads <- sp
+//
+//    hi
+
+gencall e      // push all passing parameters
+  out push sp fp     //   save fp
+  e1 = tail head e   //  ref to fun 
+  e = arg2 e         //  arg list
+  while e != nil
+    out push sp gen head e
+    e = tail e
+  out jal lnk getRef e1
+  ret retval
+
+//  frame size must be update due to extra tmp regs
+
+genfun e
+  ref = getRef head e   // what is fname?
+  fs = getFs ref
+  arity = getArg ref
+  out mv fp #(sp-arity)  //  create new frame
+  m = where 
+  out add sp sp #(fs-arity)
+  out push sp lnk        // save retads
+  r1 = gen arg2 e        //  body
+  out mv retval r1
+  out pop sp lnk         //  retads -> lnk
+  out mv sp fp
+  out pop sp fp          //  restore fp'
+  out ret lnk 
+  freeR r1
+  patch m maxreg
+  ret retval
+
+genret e
+  if e != nil  
+    r1 = gen head e
+    out mv retval r1
+    freeR r1
+  out pop sp lnk         //  retads -> lnk
+  out mv sp fp
+  out pop sp fp          //  restore fp'
+  out ret lnk 
+  ret retval  
+
+---------------------
+
+genprint e
+
+while e != nil
+  e2 = head e
+  if isatom e2
+     ty = head e2
+     v = tail e2
+     switch ty
+     case NUM:  
+        out call printnum v
+     case STRING:
+        out call printstring &strbuf[v]
+     case GNAME:
+        r1 = newR
+        a = (getRef v) + base_data
+        out ld r1 a
+        out call printnum r1
+        freeR r1
+     case LNAME:
+        r1 = newR
+        out ld r1 +v fp
+        out call printnum r1
+        freeR r1
+  else
+     r1 = gen e2
+     out call printnum r1
+     freeR r1
+  e = tail e
+
+ret nil
+
+--------------
+end    20 Nov 2010

@@ -1,0 +1,38 @@
+rz-pointer
+
+
+when we use index as a way to indirect address (for a pointer), we must be careful about addressing mode.
+
+x = input()
+c = x[0]                 use x as pointer, x is local
+
+trap r0 #input
+mov r1 r28               ;  get pointer to r1
+mov r2 #0                ;  zero index
+ld r3 +r1 r2           
+
+but when x is global, we must derefence x once
+
+x global
+
+trap r0 #input
+str r28 x
+ld r1 x
+mov r2 #0
+ld r3 +r1 r2
+
+this is different from declaring x as vector (static array)
+
+x[20]
+
+...
+c = x[0]
+
+mov r2 #0
+ld r3 @x r2     ;  &x is known at compile time, x is static array
+
+
+3 Feb 2017
+
+
+

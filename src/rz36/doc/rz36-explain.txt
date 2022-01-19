@@ -1,0 +1,33 @@
+rz36   rz3 version 6
+
+It is rz34, rz35  but gencode for s2 version 3.
+
+Use indent as { } and \n as ";" to "clean" the syntax. This is ported from rz34.
+
+present state
+
+1)  cannot return value in recursive call
+    because use "retval" register. must "push" it.
+2)  do not generate code for * &
+3)  have asm("...")
+
+
+to do list
+
+1. add some functions that support NOS:
+  run(...)
+2. improve codegen to handle #im mode better.
+
+12 Jan 2013
+
+Now it compiles interrupt() correctly.  The interrupt is declared without passing parameters (it should not pass any parameters) like this:
+
+interrupt()
+  ...
+
+If no local variable is used in the body, it generates machine code with no frame.  The interrupt service routine is ended with "ret r31", return from interrupt.  This is different from a normal return which is "ret rads". The name "interrupt" is a global symbol. It can be referred to in the assembly code, such as "mov r1 #interrupt" and "st r1 1000" (set up the interrupt vector at the address 1000).
+
+The declaration of "asm(x)" will not generate any code if its body is empty.
+
+15 Jan 2013
+

@@ -1,0 +1,54 @@
+
+
+rz hash table
+
+change sequential search to hash search
+
+symbol table is wide-data records stored contiguously.  
+local and global are seperate although live in the same block (different index-range).
+attribute of symbol table: name, type, ref, arg, fs
+
+to search this table quickly, we use hashtable to associate name and symbol table record.  Hash table is narrow (one word) and lengthly table (at least should be double of the maximum number of symbol
+in the symbol table).  Global and local hashtable are seperate to avoid clashing betweeen them. 
+
+API
+
+hsearch(table,name)  return index to hashtable
+
+
+hsearch(table,name)
+  index = hash(name)
+  if table[index] == 0  return index (not found)
+  while( table[index] != 0 )	// until found or find empty slot
+    if eqstr(name, symbolTable[table[index]].name)
+      return index (found)
+    index++			// linear hash
+    index %= tablesize
+  return index (not found)
+
+we can check that name is found by hashtable[index] != 0.
+
+Local symbol table
+
+We need to delete local symbols.  However, we don't want to delete the name (because it is likely that the name is reused frequently). So, we distinguish the "empty" name by setting ref = 0 in its symbol table. 
+
+With the same API as global search, local search return index.  If the name is found, we need to further check that it is "old" or "new" name by looking up its ref.  
+
+We need to "delete" the local names.  We keep a local list using an unused attribute in the local symbol table (such as symboltable[].arg) as the link field for a single linked list.  To delete the whole set of current locals without deleting the record (and its name), we can follow this local-list and null its ref.
+
+p = localList
+while( p != 0 )
+  symbolTable[p].ref = 0
+  p = symbolTable[p].arg	// next link
+
+When insert the new record
+
+p = newrecord()
+symbolTable[p].arg = localList  // link to the list
+localList = p
+
+5 Feb 2017
+
+
+ 
+

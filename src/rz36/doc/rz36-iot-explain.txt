@@ -1,0 +1,31 @@
+rz36 iot  
+
+rz36 generate s2 code.
+with iot there are some additional commands.
+
+interrupt
+
+int0()
+int1()
+int2()
+int3()
+
+if these commands are defined, the binding for interrupt (interrupt vectors) will be generated in the header of the main function.
+
+mov r1 #int0
+st r1 1000       ;  int vec
+....
+
+other functions
+
+ei(n)
+di(n)           enable/disable int n, n = 0,1,2,3
+doze()	        special instruction "sleep and wait for int"
+readport(p)     
+writeport(p)    read/write IoT board ports, p = 10,11,12,13,14,15
+settimer0(d)    set timer range with d
+settimer1(d)
+
+28 Jan 2017
+Chinese new year
+
