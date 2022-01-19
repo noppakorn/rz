@@ -12,3 +12,7 @@ Compiling `test/double.txt`
 1. Compile `rz36 test/double.txt > double-s.txt`
 2. Assemble `as21 double-s.txt`
 3. Run in simulator `sim21 double-s.obj`
+## About rz36-3
+rz-36-3 is developed by Prabhas Chongstitvatana.
+Read about rz36-3 [here](https://www.cp.eng.chula.ac.th/~prabhas/project/rz3/index-rz3.htm)
+
