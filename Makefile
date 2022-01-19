@@ -1,10 +1,10 @@
-CC = cc
-CCFLAGS = -O2 -std=c11
+CC = c++
+CCFLAGS = -O2
 
 all: rz36 as21 sim21
 
 rz36:
-	${CC} ${CCFLAGS} -I src/rz36/comp/. -o rz36 src/rz36/comp/*.c
+	${CC} ${CCFLAGS} -o rz36 src/rz36/comp/*.c
 
 as21:
 	${CC} ${CCFLAGS} -o as21 src/as21/*.c
