@@ -1,5 +1,5 @@
-CC = c++
-CCFLAGS = -O2
+CC = cc
+CCFLAGS = -O2 -std=gnu11
 
 all: rz36 as21 sim21
 
