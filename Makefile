@@ -14,7 +14,7 @@ sim21:
 
 
 clean:
-	rm rz36
-	rm as21
-	rm sim21
+	-rm rz36
+	-rm as21
+	-rm sim21
 
