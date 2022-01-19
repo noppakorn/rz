@@ -1,6 +1,6 @@
 // parser generated from rz-grammar 17 Oct 2010
-#include <compile.h>
-#include <parse.h>
+#include "compile.h"
+#include "parse.h"
 extern int pv;
 
 int pass(void){
