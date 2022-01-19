@@ -128,7 +128,7 @@ void store(char type, char mode, int ref){
 }
 
 // check number
-int isnumber(char *s){
+int isnumber_(char *s){
 	int i = 0;
 	if(s[0] == '-') i = 1;
 	while( isdigit(s[i]) ) i++;
@@ -138,7 +138,7 @@ int isnumber(char *s){
 
 int getNum(void){
 	w = tok();
-	if(isnumber(w))	return atoi(w);
+	if(isnumber_(w))	return atoi(w);
 	error("expect number");
 	return 0;
 }
@@ -150,7 +150,7 @@ void setop(char mode){
 
 int valueof(char *s, int *type){
 	*type = NUM;
-	if( isnumber(s) ) return atoi(s);
+	if( isnumber_(s) ) return atoi(s);
 	*type = SYM;
 	return putsym(s);
 }
@@ -291,7 +291,7 @@ void pass1(void){
 			setsym(idx,getNum(),SYM,NA);
 			break;
 		case 'D':
-			if( isnumber(w) )
+			if( isnumber_(w) )
 				store(NUM,NA,atoi(w));
 			else
 				store(SYM,NA,putsym(w));
