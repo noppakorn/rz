@@ -1,0 +1,32 @@
+// permutation generation
+
+// N = 4
+N, val[4], id
+
+writeperm()
+  i = 0
+  while( i<N )
+    print(val[i], " ")
+    i = i + 1
+  print("\n")
+
+visit(k)
+  id = id + 1
+  val[k] = id
+  if( id == N - 1) writeperm()
+  t = 0
+  while( t<N )
+    if( val[t] == 0 ) visit(t)
+    t = t + 1
+  id = id - 1
+  val[k] = 0
+
+main()
+  N = 4
+  i = 0
+  while( i<N )
+    val[i] = 0
+    i = i + 1
+  id = 0 -1
+  visit(0)
+

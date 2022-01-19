@@ -1,0 +1,38 @@
+// prime number Sieve of Eratosthenes
+
+// N  check prime in the range 2..N
+N, a[101]
+
+sieve()
+  p = 2
+  while( p*p <= N )
+    j = p + p
+    while( j <= N )
+      a[j] = 0
+      j = j + p
+    p = p + 1
+    while( a[p] == 0 ) p = p + 1
+
+show()
+  cnt = 0
+  last = 0
+  i = 2
+  while( i<=N )
+    if ( a[i] )
+      print(i, " ")
+      last = i
+      cnt = cnt + 1
+    i = i + 1
+  print("\n prime found ",cnt," last ",last,"\n")
+
+main()
+  N = 100
+  a[1] = 0
+  i = 2
+  while( i<=N )
+    a[i] = 1
+    i = i + 1
+  sieve()
+  show()
+
+

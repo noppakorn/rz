@@ -1,0 +1,28 @@
+// test input, prints, printc
+
+atoi(s)
+  v = 0
+  i = 0
+  c = s[i]
+  while( c != 0 )
+    v = v*10 + (c-48)
+    i = i + 1
+    c = s[i]
+  return v
+
+main()
+  x = input()
+//  prints(x)
+  i = 0
+  c = x[i]
+  while( c != 0 )
+    printc(c)
+    printc(32)
+    i = i + 1
+    c = x[i]
+  v = atoi(x)
+  print(v)
+
+
+
+

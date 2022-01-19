@@ -1,0 +1,53 @@
+// quicksort
+
+N, a[10]
+
+inita()
+  i = 0
+  while( i<N )
+    a[i] = i
+    i = i + 1
+
+show()
+  i = 0
+  while( i<N )
+    print(a[i]," ")
+    i = i + 1
+  print("\n")
+
+swapx(i,j)
+  t = a[i]
+  a[i] = a[j]
+  a[j] = t
+
+partition(p,r)
+  x = a[p]
+  i = p - 1
+  j = r + 1
+  flag = 1
+  while(flag)
+    j = j - 1
+    while(a[j] > x)
+      j = j - 1
+    i = i + 1
+    while(a[i] < x)
+      i = i + 1
+    if( i < j ) swapx(i,j)
+    else flag = 0
+  return j
+
+quicksort(p,r)
+  if(p < r)
+    q = partition(p,r)
+    quicksort(p,q)
+    quicksort(q+1,r)
+
+main()
+  N = 10
+  inita()
+  swapx(0,5)
+  swapx(2,8)
+  show()
+  quicksort(0,N-1)
+  show()
+

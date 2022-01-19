@@ -1,0 +1,19 @@
+// sum array
+
+ax[10]
+
+sum()
+  i = 0
+  s = 0
+  while( i < 4 )
+    s = s + ax[i]
+    i = i + 1
+  return s
+
+main()
+  ax[0] = 11
+  ax[1] = 22
+  ax[2] = 33
+  ax[3] = 44
+  print(sum(),"\n")
+

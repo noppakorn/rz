@@ -1,0 +1,8 @@
+
+; input string
+
+.code 0
+  trap r0 #4    ; input
+  trap r0 #0
+.data 200
+.end

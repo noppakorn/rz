@@ -1,0 +1,13 @@
+// test pointer
+
+g         // global pointer
+ar[20]    // static array
+
+main()
+  g = input()
+  c = g[0]
+  d = ar[1]
+  x = 11
+  c = x[0]    // local pointer
+
+  

@@ -1,0 +1,16 @@
+
+; test char
+
+.symbol
+.code 0
+  mov r1 #45
+:while
+  lt r2 r1 #64
+  jf r2 exit
+  trap r1 #2
+  add r1 r1 #1
+  jmp while
+:exit
+  trap r0 #0
+.data 200
+.end
