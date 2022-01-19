@@ -1,0 +1,12 @@
+//  quad.txt
+
+double(x)
+  return x + x
+
+quad(y)
+  b = double(y)
+  return b + b
+
+main()
+  a = quad(44)
+  print(a)
