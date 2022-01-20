@@ -1,7 +1,7 @@
 # rz
 Building rz36-3 compiler on Linux and macOS
 
-![Build Project](https://github.com/github/docs/actions/workflows/release.yml/badge.svg)
+![Build Project](https://github.com/github/docs/actions/workflows/main.yml/badge.svg)
 ## Requirements
 - c compiler (tested with gcc and clang)
 - make
