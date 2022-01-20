@@ -1,4 +1,4 @@
-name: C/C++ CI
+name: Build Project
 
 on:
   push:
@@ -6,17 +6,23 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    name: "Build rz compiler on ${{ matrix.os }} with ${{ matrix.compiler }}"
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-11]
+        compiler: [gcc-10, clang]
+        include:
+          - os: ubuntu-latest
+            compiler: gcc-10
+          - os: ubuntu-latest
+            compiler: clang
+          - os: macos-latest
+            compiler: gcc-10
+          - os: macos-latest
+            compiler: clang
+
     steps:
     - uses: actions/checkout@v2
     - name: make
-      run: make
-    - name: Release
-      uses: softprops/action-gh-release@v1
-      if: startsWith(github.ref, 'refs/tags/')
-      with:
-        files: |
-          as21
-          rz36
-          s21
-          
+      run: CC={{ matrix.compiler }} make
