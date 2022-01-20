@@ -1,0 +1,46 @@
+.symbol
+ fp 30
+ sp 29
+ retval 28
+ rads 27
+.code 0
+ mov fp #3500
+ mov sp #3000
+ jal rads main
+ trap r0 #0
+; fun double pv 1
+:double
+st r1 @1 fp
+st r2 @2 fp
+add fp fp #3
+st rads @0 fp
+pop sp r1
+add r2 r1 r1
+mov retval r2
+jmp L101
+:L101
+ld rads @0 fp
+sub fp fp #3
+ld r2 @2 fp
+ld r1 @1 fp
+ret rads
+; fun main pv 0
+:main
+; gnAsg :(#1 (call double 33 ))
+st r1 @1 fp
+st r2 @2 fp
+add fp fp #3
+st rads @0 fp
+mov r2 #33
+push sp r2
+jal rads double
+mov r1 r28
+trap r1 #1
+:L102
+ld rads @0 fp
+sub fp fp #3
+ld r2 @2 fp
+ld r1 @1 fp
+ret rads
+.data 200
+.end

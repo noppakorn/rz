@@ -1,0 +1,8 @@
+// example double
+
+double(x)
+  return x + x
+
+main()
+  y = double(33)
+  print(y)
