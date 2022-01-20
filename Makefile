@@ -1,4 +1,7 @@
-CC = cc
+ifndef CC
+	CC = cc
+endif
+
 CCFLAGS = -O2 -std=gnu11
 
 all: rz36 as21 sim21
