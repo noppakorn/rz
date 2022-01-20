@@ -18,9 +18,9 @@ jobs:
             compiler: gcc-10
           - os: ubuntu-latest
             compiler: clang
-          - os: macos-latest
+          - os: macos-11
             compiler: gcc-10
-          - os: macos-latest
+          - os: macos-11
             compiler: clang
 
     steps:
